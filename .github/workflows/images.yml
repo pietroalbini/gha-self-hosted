@@ -1,0 +1,38 @@
+---
+
+name: Images
+on:
+  push:
+    branches:
+      - master
+      - ci # TODO: remove me
+  pull_request:
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-20.04
+
+    strategy:
+      matrix:
+        include:
+          - image: ubuntu
+            arch: x86_64
+
+          - image: ubuntu
+            arch: aarch64
+
+    steps:
+      - name: Clone the source code
+        uses: actions/checkout@v2
+
+      - name: Install QEMU
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          sudo apt-get update
+          sudo apt-get install qemu qemu-system-x86 qemu-system-aarch64
+
+      - name: Build the QEMU image
+        run: |
+          cd images/${{ matrix.image  }}
+          make ${{ matrix.arch  }}-emul
